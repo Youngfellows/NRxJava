@@ -1,0 +1,2 @@
+rootProject.name='NRxJava'
+include ':app'
