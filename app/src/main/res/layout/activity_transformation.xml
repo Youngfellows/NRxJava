@@ -102,6 +102,48 @@
             android:onClick="onJust"
             android:text="just发射器依次调用 onNext() 方法" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onSingle"
+            android:text="Single 只会接收一个参数，而 SingleObserver 只会调用 onError() 或者 onSuccess()" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onDebounce"
+            android:text="debounce去除发送频率过快的项" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onDefer"
+            android:text="defer简单地时候就是每次订阅都会创建一个新的 Observable，并且如果没有被订阅，就不会产生新的 Observable" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onLast"
+            android:text="last 操作符仅取出可观察到的最后一个值，或者是满足某些条件的最后一项" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMerge"
+            android:text="merge合并" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onReduce"
+            android:text="reduce 操作符每次用一个方法处理一个值" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onScan"
+            android:text="scan 操作符作用和上面的 reduce 一致，唯一区别是 reduce 是个只追求结果的坏人，而 scan 会始终如一地把每一个步骤都输出" />
+
 
     </LinearLayout>
 </ScrollView>

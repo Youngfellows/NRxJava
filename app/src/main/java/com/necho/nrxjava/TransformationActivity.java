@@ -11,9 +11,12 @@ import com.necho.nrxjava.bean.Person;
 import com.necho.nrxjava.bean.Student;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -21,6 +24,8 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
@@ -589,6 +594,202 @@ public class TransformationActivity extends AppCompatActivity {
                     @Override
                     public void accept(Person person) throws Exception {
                         Log.d(TAG, "accept: " + person);
+                    }
+                });
+    }
+
+    /**
+     * Single 只会接收一个参数，而 SingleObserver 只会调用 onError() 或者 onSuccess()
+     */
+    public void onSingle(View view) {
+        Single.just(new Random().nextInt(100))
+                .subscribe(new SingleObserver<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        Log.d(TAG, "onSubscribe: ");
+                    }
+
+                    @Override
+                    public void onSuccess(Integer integer) {
+                        Log.d(TAG, "onSuccess: " + integer);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + e);
+                    }
+                });
+    }
+
+    /**
+     * debounce
+     * 去除发送频率过快的项
+     */
+    public void onDebounce(View view) {
+        Observable
+                .create(new ObservableOnSubscribe<Person>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<Person> emitter) throws Exception {
+                        emitter.onNext(new Person("杨过", 22));//skip
+                        Thread.sleep(100);
+                        emitter.onNext(new Person("小龙女", 23));//deliver
+                        Thread.sleep(505);
+                        emitter.onNext(new Person("郭靖", 24));//skip
+                        Thread.sleep(400);
+                        emitter.onNext(new Person("黄蓉", 25));//deliver
+                        Thread.sleep(1000);
+                        emitter.onNext(new Person("李寻欢", 26));//skip
+                        Thread.sleep(300);
+                        emitter.onNext(new Person("武松", 27));//deliver
+                        Thread.sleep(600);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Person>() {
+                    @Override
+                    public void accept(Person person) throws Exception {
+                        Log.d(TAG, "accept: " + person);
+                    }
+                });
+    }
+
+    /**
+     * defer简单地时候就是每次订阅都会创建一个新的 Observable，并且如果没有被订阅，就不会产生新的 Observable
+     *
+     * @param view
+     */
+    public void onDefer(View view) {
+        Observable<Integer> observable = Observable.defer(new Callable<ObservableSource<Integer>>() {
+            @Override
+            public ObservableSource<Integer> call() throws Exception {
+                Log.d(TAG, "call: ");
+                return Observable.just(1, 2, 3, 4);
+            }
+        });
+
+        observable.subscribe(new Observer<Integer>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: ");
+            }
+
+            @Override
+            public void onNext(Integer integer) {
+                Log.d(TAG, "onNext: " + integer);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError: " + e);
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+            }
+        });
+    }
+
+    /**
+     * last 操作符仅取出可观察到的最后一个值，或者是满足某些条件的最后一项
+     */
+    public void onLast(View view) {
+        Observable.just(1, 2, 3, 5)
+                .last(2)
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.d(TAG, "accept: " + integer);
+                    }
+                });
+    }
+
+    /**
+     * merge合并
+     *
+     * @param view
+     */
+    public void onMerge(View view) {
+        List<Person> p1 = new ArrayList<Person>() {
+            {
+                add(new Person("张无忌", 23));
+                add(new Person("赵敏", 18));
+                add(new Person("周芷若", 24));
+                add(new Person("杨过", 16));
+                add(new Person("小龙女", 32));
+            }
+        };
+
+        List<Person> p2 = new ArrayList<Person>() {
+            {
+                add(new Person("令狐冲", 27));
+                add(new Person("风清扬", 64));
+                add(new Person("西门吹雪", 29));
+                add(new Person("林冲", 25));
+            }
+        };
+
+        Observable<Person> observable1 = Observable.fromIterable(p1);
+        Observable<Person> observable2 = Observable.fromIterable(p2);
+        Observable.merge(observable1, observable2)
+                .subscribe(new Consumer<Person>() {
+                    @Override
+                    public void accept(Person person) throws Exception {
+                        Log.d(TAG, "accept: " + person);
+                    }
+                });
+
+    }
+
+    /**
+     * reduce 操作符每次用一个方法处理一个值，可以有一个 seed 作为初始值。
+     * 同递归
+     */
+    public void onReduce(View view) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 1; i <= 100; i++) {
+            list.add(i);
+        }
+
+        Observable.fromIterable(list)
+                .reduce(new BiFunction<Integer, Integer, Integer>() {
+                    @Override
+                    public Integer apply(Integer integer, Integer integer2) throws Exception {
+                        Log.d(TAG, "apply: " + integer + "," + integer2);
+                        return integer + integer2;
+                    }
+                })
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.d(TAG, "accept: " + integer);
+                    }
+                });
+    }
+
+    /**
+     * scan 操作符作用和上面的 reduce 一致，唯一区别是 reduce 是个只追求结果的坏人，而 scan 会始终如一地把每一个步骤都输出
+     */
+    public void onScan(View view) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 1; i <= 100; i++) {
+            list.add(i);
+        }
+
+        Observable.fromIterable(list)
+                .scan(new BiFunction<Integer, Integer, Integer>() {
+                    @Override
+                    public Integer apply(Integer integer, Integer integer2) throws Exception {
+                        Log.d(TAG, "apply: " + integer + "," + integer2);
+                        return integer + integer2;
+                    }
+                })
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.d(TAG, "accept: " + integer);
                     }
                 });
     }
