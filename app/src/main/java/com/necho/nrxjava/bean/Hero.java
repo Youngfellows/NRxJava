@@ -1,21 +1,13 @@
 package com.necho.nrxjava.bean;
 
 
-import java.util.Arrays;
-import java.util.List;
-
-public class Student {
-
+public class Hero {
     private String name;
-
     private int age;
 
-    private Course[] courses;//课程
-
-    public Student(String name, int age, Course[] courses) {
+    public Hero(String name, int age) {
         this.name = name;
         this.age = age;
-        this.courses = courses;
     }
 
     public String getName() {
@@ -34,21 +26,11 @@ public class Student {
         this.age = age;
     }
 
-    public Course[] getCourses() {
-        return courses;
-    }
-
-    public void setCourses(Course[] courses) {
-        this.courses = courses;
-    }
-
-
     @Override
     public String toString() {
-        return "Student{" +
+        return "Hero{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
-                ", courses=" + Arrays.toString(courses) +
                 '}';
     }
 }
