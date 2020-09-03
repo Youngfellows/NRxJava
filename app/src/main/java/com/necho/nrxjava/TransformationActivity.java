@@ -28,6 +28,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.exceptions.CompositeException;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -742,6 +743,117 @@ public class TransformationActivity extends AppCompatActivity {
                 });
 
     }
+
+
+    /**
+     * mergeArray异常后正常数据立即终止发送
+     */
+    public void onMergeArray(View view) {
+        Log.d(TAG, "onMergeArray: ");
+        Observable[] observables = getObservables();
+        Observer observer = getObserver();
+        Observable.mergeArray(observables)
+                .subscribe(observer);
+    }
+
+    /**
+     * mergeDelayError在合并和交错输出上和merge一样，
+     * 但是mergeDelayError的原始observable出现onError时，错误通知会被保留，
+     * 直到所有数据发射完毕后才执行onError。如果有多个原始observable出现了onError，
+     * 这些onError通知会被合并成一个CompositeException ，
+     * 保留在它的 List<Throwable> exceptions异常列表里。
+     * 如果只有一个原始observable出现了onError，
+     * 则会直接使用这个onError通知，而不会生成CompositeException。
+     * <p>
+     * 正常数据都会走完，异常总是在最后，而且合并后走onError
+     */
+    public void onMergeArrayDelayError(View view) {
+        Log.d(TAG, "onMergeArrayDelayError: ");
+        Observable[] observables = getObservables();
+        Observer observer = getObserver();
+        Observable.mergeArrayDelayError(observables)
+                .subscribe(observer);
+    }
+
+    /**
+     * 获取被观察者列表
+     * 数据发生器列表
+     *
+     * @return
+     */
+    private Observable[] getObservables() {
+        ArrayList<Observable> observables = new ArrayList<>();
+        Observable observable1 = Observable.just(1, 2, 3)
+                .subscribeOn(Schedulers.io())//注意：这里指定线程,事件发生在io线程,
+                .observeOn(AndroidSchedulers.mainThread());//事件回调在主线程
+        Observable observable2 = Observable.just(4, 5, 6)
+                .subscribeOn(Schedulers.io())//注意：这里指定线程,事件发生在io线程,
+                .observeOn(AndroidSchedulers.mainThread());//事件回调在主线程
+        Observable observable3 = Observable.just(7, 8, 9)
+                .subscribeOn(Schedulers.io())//注意：这里指定线程,事件发生在io线程,
+                .observeOn(AndroidSchedulers.mainThread());//事件回调在主线程
+
+        Observable<Object> error1 = Observable.error(new Error("---error1---"))
+                .subscribeOn(Schedulers.io())//注意：这里指定线程,事件发生在io线程,
+                .observeOn(AndroidSchedulers.mainThread());//事件回调在主线程
+        Observable<Object> error2 = Observable.error(new Error("---error1---"))
+                .subscribeOn(Schedulers.io())//注意：这里指定线程,事件发生在io线程,
+                .observeOn(AndroidSchedulers.mainThread());//事件回调在主线程
+
+        observables.add(observable1);
+        observables.add(error1);
+        observables.add(observable2);
+        observables.add(error2);
+        observables.add(observable3);
+
+        //将集合转化为数组
+        Observable[] observableArray = observables.toArray(new Observable[observables.size()]);
+        return observableArray;
+    }
+
+
+    /**
+     * 获取观察者
+     */
+    private Observer getObserver() {
+        return new Observer() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: ======onSubscribe=======");
+            }
+
+            @Override
+            public void onNext(Object o) {
+                Log.d(TAG, "onNext: ======onNext o=======" + o);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                //CompositeException :
+                //如果有多个原始observable出现了onError，
+                //这些onError通知会被合并成一个CompositeException ，
+                //保留在它的 List<Throwable> exceptions异常列表里。
+                //如果只有一个原始observable出现了onError，
+                //则会直接使用这个onError通知，而不会生成CompositeException。
+                if (e instanceof CompositeException) {
+                    CompositeException compositeException = (CompositeException) e;
+                    List<Throwable> exceptions = compositeException.getExceptions();
+                    if (exceptions != null && exceptions.size() > 0) {
+                        for (int i = 0; i < exceptions.size(); i++) {
+                            Log.d(TAG, "======onError each=======" + exceptions.get(i).getMessage());
+                        }
+                    }
+                }
+                Log.d(TAG, "onError: ======onError 总=======" + e.getMessage());
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ======onComplete=======");
+            }
+        };
+    }
+
 
     /**
      * reduce 操作符每次用一个方法处理一个值，可以有一个 seed 作为初始值。

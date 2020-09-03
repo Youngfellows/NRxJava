@@ -135,6 +135,18 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onMergeArray"
+            android:text="mergeArray合并" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMergeArrayDelayError"
+            android:text="mergeArrayDelayError合并" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:onClick="onReduce"
             android:text="reduce 操作符每次用一个方法处理一个值" />
 
