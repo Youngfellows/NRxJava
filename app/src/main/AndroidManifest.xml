@@ -9,7 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TransformationActivity"></activity>
+        <activity android:name=".AnnotationActivity"></activity>
+        <activity android:name=".GenericsActivity" />
+        <activity android:name=".TransformationActivity" />
         <activity android:name=".CommonActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

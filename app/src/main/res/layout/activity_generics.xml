@@ -5,30 +5,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".GenericsActivity">
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onCommonUse"
-        android:text="RxJava2的基本使用" />
+        android:onClick="onClick1"
+        android:text="基本使用" />
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onTransformation"
-        android:text="RxJava2的变换" />
+        android:onClick="onClick2"
+        android:text="泛型接口、泛型类" />
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onGenerics"
-        android:text="JAVA泛型的使用" />
+        android:onClick="onClick3"
+        android:text="泛型方法" />
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onAnnotation"
-        android:text="Java 注解" />
+        android:onClick="onClick4"
+        android:text="建复杂模型如list元组" />
 
 </LinearLayout>

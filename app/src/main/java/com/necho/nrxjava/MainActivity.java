@@ -32,4 +32,24 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TransformationActivity.class);
         startActivity(intent);
     }
+
+    /**
+     * JAVA泛型的使用
+     *
+     * @param view
+     */
+    public void onGenerics(View view) {
+        Intent intent = new Intent(this, GenericsActivity.class);
+        startActivity(intent);
+    }
+
+    /**
+     * Java 注解
+     *
+     * @param view
+     */
+    public void onAnnotation(View view) {
+        Intent intent = new Intent(this,AnnotationActivity.class);
+        startActivity(intent);
+    }
 }
